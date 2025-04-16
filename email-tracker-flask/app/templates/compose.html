@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Compose and Send Tracked Email</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }} {# CSRF protection #}
+        <p>
+            {{ form.recipient.label }}<br>
+            {{ form.recipient(size=50) }}<br>
+            {% for error in form.recipient.errors %}
+            <span class="form-field-error">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.subject.label }}<br>
+            {{ form.subject(size=80) }}<br>
+            {% for error in form.subject.errors %}
+            <span class="form-field-error">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+         <p>
+            {{ form.body_html.label }}<br>
+            {{ form.body_html(rows=15) }}<br> {# Basic textarea #}
+            {% for error in form.body_html.errors %}
+            <span class="form-field-error">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            <small>Note: A tracking pixel will be automatically added to the end of this email.</small>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

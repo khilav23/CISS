@@ -1,0 +1,56 @@
+{% extends "base.html" %} {# Inherit base template #}
+
+{% block content %} {# Wrap content in block #}
+    {# The original H1 and report content go here #}
+    <h1>Email Tracking Report</h1>
+    {% if email %}
+        <p>Tracking ID: <code>{{ email.tracking_id }}</code></p>
+        <p>Sent By: {{ email.sender_user.username if email.sender_user else 'N/A' }}</p> {# Show sender user #}
+
+        <div class="details">
+            <h2>Send Details</h2>
+            {# REMOVED: {% load tz %} #} {# Load timezone tags if needed for local time display #}
+            <p><strong>Sent At (UTC):</strong> {{ email.send_time.strftime('%Y-%m-%d %H:%M:%S') if email.send_time else 'N/A' }}</p>
+            <p><strong>Sender IP (App):</strong> {{ email.sender_ip | default('N/A') }}</p> {# Clarify this is app/user IP #}
+            <p><strong>Sender Location (App):</strong> {{ email.sender_location | default('N/A') }}</p>
+            <p><strong>Subject:</strong> {{ email.subject | default('(No Subject Provided)') }}</p>
+            <p><strong>Recipient:</strong> {{ email.recipient_email | default('(Not Provided)') }}</p>
+        </div>
+
+        <h2>Open Events (Total Recorded: {{ total_opens }})</h2>
+        {% if opens %}
+            {# Re-use table style from base.css (implicitly included) #}
+            <table class="dashboard-table"> {# Use same class for consistency #}
+                 <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Opened At (UTC)</th>
+                        <th>Opener IP</th>
+                        <th>Opener Location</th>
+                        <th class="ua-col">User Agent</th>
+                    </tr>
+                </thead>
+                 <tbody>
+                    {% for open_event in opens %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ open_event.open_time.strftime('%Y-%m-%d %H:%M:%S') if open_event.open_time else 'N/A' }}</td>
+                        <td>{{ open_event.opener_ip | default('N/A') }}</td>
+                        <td>{{ open_event.opener_location | default('N/A') }}</td>
+                        <td class="ua-col">{{ open_event.user_agent | default('N/A') | escape }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="note"><strong>Note:</strong> Multiple opens, especially from varying IPs/locations, <em>might</em> indicate forwarding or opens on different devices/networks. However, this can also be caused by email client image proxies (like Gmail's) or repeat opens by the original recipient. This list shows every recorded open event.</p>
+        {% else %}
+            <p class="no-opens">This email has not been opened yet, or opens could not be tracked (e.g., images blocked by the email client).</p>
+        {% endif %}
+
+    {% else %}
+         <p>Error: Email record not found.</p>
+    {% endif %}
+
+    <p style="margin-top: 20px;"><a href="{{ url_for('main.dashboard') }}">« Back to Dashboard</a></p>
+
+{% endblock %} {# End content block #}

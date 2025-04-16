@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Dashboard - Sent Emails</h1>
+    <p><a href="{{ url_for('main.compose_email') }}">Compose New Tracked Email</a></p>
+
+    {% if emails_pagination and emails_pagination.items %}
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Sent At (UTC)</th>
+                    <th>Recipient</th>
+                    <th>Subject</th>
+                    <th>Total Opens</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email in emails_pagination.items %}
+                <tr>
+                    <td>{{ email.send_time.strftime('%Y-%m-%d %H:%M') if email.send_time else 'N/A' }}</td>
+                    <td>{{ email.recipient_email | default('N/A') | escape }}</td>
+                    <td>{{ email.subject | default('(No Subject)') | escape }}</td>
+                    <td>{{ email.opens.count() }}</td> {# Efficient count query #}
+                    <td><a href="{{ url_for('main.view_report', tracking_id_str=email.tracking_id) }}">View Report</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {# Pagination Links #}
+        {% if emails_pagination.has_prev or emails_pagination.has_next %}
+            <div class="pagination" style="margin-top: 20px; text-align: center;">
+                {% if emails_pagination.has_prev %}
+                    <a href="{{ url_for('main.dashboard', page=emails_pagination.prev_num) }}">« Previous</a>
+                {% else %}
+                    <span style="color: #ccc;">« Previous</span>
+                {% endif %}
+                 | Page {{ emails_pagination.page }} of {{ emails_pagination.pages }} |
+                {% if emails_pagination.has_next %}
+                    <a href="{{ url_for('main.dashboard', page=emails_pagination.next_num) }}">Next »</a>
+                {% else %}
+                    <span style="color: #ccc;">Next »</span>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    {% else %}
+        <p>You haven't sent any tracked emails yet.</p>
+    {% endif %}
+{% endblock %}
